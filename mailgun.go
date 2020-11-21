@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// MailgunExporter contains everything we need (including the Prometheus collectors)
 type MailgunExporter struct {
 	privateAPIKey string
 	region        string
@@ -24,6 +25,7 @@ type MailgunExporter struct {
 	failedPermanentlyGauge prometheus.Gauge
 }
 
+// New creates a new MailgunExoprter with the given private API key and region.
 func New(privateAPIKey string, region string) (*MailgunExporter, error) {
 
 	m := &MailgunExporter{
@@ -50,18 +52,6 @@ func New(privateAPIKey string, region string) (*MailgunExporter, error) {
 	})
 
 	return m, nil
-}
-
-type Stats struct {
-	Accepted          int
-	Clicked           int
-	Complained        int
-	Delivered         int
-	FailedPermanently int
-	FailedTemporary   int
-	Opened            int
-	Stored            int
-	Unsubscribed      int
 }
 
 // CollectMetrics will get all the stats for all the domains and put them in the correct prometheus collectors.
@@ -94,6 +84,7 @@ func (m *MailgunExporter) CollectMetrics() error {
 	return nil
 }
 
+// createMailgunAPIClient creates a Mailgun API client for the given domain and the current region.
 func (m *MailgunExporter) createMailgunAPIClient(domain string) *mailgun.MailgunImpl {
 	mg := mailgun.NewMailgun(domain, m.privateAPIKey)
 
@@ -102,24 +93,6 @@ func (m *MailgunExporter) createMailgunAPIClient(domain string) *mailgun.Mailgun
 	}
 
 	return mg
-}
-
-func mailgunStatsToStats(s *mailgun.Stats) *Stats {
-
-	stats := Stats{
-		Accepted:          s.Accepted.Total,
-		Clicked:           s.Clicked.Total,
-		Complained:        s.Complained.Total,
-		Delivered:         s.Delivered.Total,
-		FailedPermanently: s.Failed.Permanent.Total,
-		FailedTemporary:   s.Failed.Temporary.Espblock,
-		Opened:            s.Opened.Total,
-		Stored:            s.Stored.Total,
-		Unsubscribed:      s.Unsubscribed.Total,
-	}
-
-	return &stats
-
 }
 
 // SetPrometheusFromStats sets all the values from the stats object as values for the Prometheus gauges.
@@ -132,6 +105,7 @@ func (m *MailgunExporter) SetPrometheusFromStats(stats *Stats) {
 	m.failedPermanentlyGauge.Set(float64(stats.FailedPermanently))
 }
 
+// GetStats returns the Mailgun stats for a given domain.
 func (m *MailgunExporter) GetStats(domain string) (*Stats, error) {
 
 	mg := m.createMailgunAPIClient(domain)
@@ -162,6 +136,7 @@ func (m *MailgunExporter) GetStats(domain string) (*Stats, error) {
 	return mailgunStatsToStats(&stats[0]), nil
 }
 
+// ListDomains returns all the domains in the current region.
 func (m *MailgunExporter) ListDomains() ([]string, error) {
 
 	mg := m.createMailgunAPIClient("")

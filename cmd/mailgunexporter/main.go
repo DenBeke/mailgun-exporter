@@ -14,6 +14,9 @@ func main() {
 		log.Fatalf("invalid config: %v", err)
 	}
 
-	mailgunexporter.Serve(config)
+	err = mailgunexporter.Serve(config)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 }

@@ -8,7 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Serve(config *Config) {
+// Serve runs the HTTP server for the metrics
+func Serve(config *Config) error {
 
 	m, err := New(config.MailgunPrivateAPIKey, config.MailgunRegion)
 	if err != nil {
@@ -16,6 +17,8 @@ func Serve(config *Config) {
 	}
 
 	e := echo.New()
+
+	e.HideBanner = true
 
 	g := e.Group("/metrics")
 
@@ -31,8 +34,10 @@ func Serve(config *Config) {
 		}
 	})
 
-	g.GET("/", echo.WrapHandler(promhttp.Handler()))
+	g.GET("", echo.WrapHandler(promhttp.Handler()))
 
-	log.Fatal(e.Start(config.HTTPAddress))
+	log.Println("Starting Mailgun Exporter ✉️")
+
+	return e.Start(config.HTTPAddress)
 
 }

@@ -1,0 +1,10 @@
+version: "3"
+services:
+  mailgunexporter:
+    container_name: mailgunexporter
+    image: denbeke/mailgunexporter
+    ports:
+      - "9999:9999"
+    environment:
+      - MAILGUN_REGION=EU
+      - MAILGUN_PRIVATE_API_KEY=

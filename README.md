@@ -23,11 +23,29 @@ services:
       - MAILGUN_PRIVATE_API_KEY=<your-mailgun-key>
 ```
 
+ℹ️ Don't forget to specify the correct region (`US` or `EU`). Otherwise you might not see your domains.
+
 
 ## Run in Development
 
     env MAILGUN_REGION=EU MAILGUN_PRIVATE_API_KEY=<your-mailgun-key> go run cmd/mailgunexporter/*.go
 
+
+## Available metrics
+
+The following metrics are available at `:9999/metrics`:
+
+- `mailgun_accepted_total`
+- `mailgun_delivered_total`
+- `mailgun_failed_temporary_total`
+- `mailgun_failed_permanently_total`
+- `mailgun_opened_total`
+- `mailgun_clicked_total`
+- `mailgun_complained_total`
+- `mailgun_unsubscribed_total`
+- `mailgun_stored_total`
+
+All metrics have `domain` as a label.
 
 
 ## Grafana Dashboard

@@ -29,6 +29,14 @@ services:
     env MAILGUN_REGION=EU MAILGUN_PRIVATE_API_KEY=<your-mailgun-key> go run cmd/mailgunexporter/*.go
 
 
+
+## Grafana Dashboard
+
+A Grafana dashboard for these metrics is available here: [./grafana/dashboard.json](grafana/dashboard.json)
+
+[![](grafana/dashboard.png)](grafana/dashboard.png)
+
+
 ## Author
 
 [Mathias Beke](https://denbeke.be)

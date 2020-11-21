@@ -22,6 +22,11 @@ type MailgunExporter struct {
 	deliveredGauge         *prometheus.GaugeVec
 	failedTemporaryGauge   *prometheus.GaugeVec
 	failedPermanentlyGauge *prometheus.GaugeVec
+	openedGauge            *prometheus.GaugeVec
+	clickedGauge           *prometheus.GaugeVec
+	complainedGauge        *prometheus.GaugeVec
+	unsubscribedGauge      *prometheus.GaugeVec
+	storedGauge            *prometheus.GaugeVec
 }
 
 // New creates a new MailgunExoprter with the given private API key and region.
@@ -49,6 +54,26 @@ func New(privateAPIKey string, region string) (*MailgunExporter, error) {
 	}, labels)
 	m.failedPermanentlyGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mailgun_failed_permanently_total",
+		Help: "",
+	}, labels)
+	m.openedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mailgun_opened_total",
+		Help: "",
+	}, labels)
+	m.clickedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mailgun_clicked_total",
+		Help: "",
+	}, labels)
+	m.complainedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mailgun_complained_total",
+		Help: "",
+	}, labels)
+	m.unsubscribedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mailgun_unsubscribed_total",
+		Help: "",
+	}, labels)
+	m.storedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mailgun_stored_total",
 		Help: "",
 	}, labels)
 
@@ -106,6 +131,11 @@ func (m *MailgunExporter) SetPrometheusFromStats(stats *Stats, domain string) {
 	m.deliveredGauge.With(labels).Set(float64(stats.Delivered))
 	m.failedTemporaryGauge.With(labels).Set(float64(stats.FailedTemporary))
 	m.failedPermanentlyGauge.With(labels).Set(float64(stats.FailedPermanently))
+	m.openedGauge.With(labels).Set(float64(stats.Opened))
+	m.clickedGauge.With(labels).Set(float64(stats.Clicked))
+	m.complainedGauge.With(labels).Set(float64(stats.Complained))
+	m.unsubscribedGauge.With(labels).Set(float64(stats.Unsubscribed))
+	m.storedGauge.With(labels).Set(float64(stats.Stored))
 }
 
 // GetStats returns the Mailgun stats for a given domain.

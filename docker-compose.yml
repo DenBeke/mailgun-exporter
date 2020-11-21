@@ -1,8 +1,8 @@
 version: "3"
 services:
-  mailgunexporter:
+  mailgun-exporter:
     container_name: mailgunexporter
-    image: denbeke/mailgunexporter
+    image: denbeke/mailgun-exporter
     ports:
       - "9999:9999"
     environment:

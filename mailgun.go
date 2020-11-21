@@ -1,55 +1,18 @@
-package main
+package mailgunexporter
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	log "github.com/sirupsen/logrus"
 )
-
-// You can find the Private API Key in your Account Menu, under "Settings":
-// (https://app.mailgun.com/app/account/security)
-var privateAPIKey = os.Getenv("MAIL_PRIVATE_API_KEY")
-
-func main() {
-
-	m, err := New(privateAPIKey, "eu")
-	if err != nil {
-		log.Fatalf("couldn't create mailgun exporter instance: %v", err)
-	}
-
-	e := echo.New()
-
-	g := e.Group("/metrics")
-
-	g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			err = m.CollectMetrics()
-			if err != nil {
-				log.Errorf("couldn't collect metrics: %v", err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "couldn't collect metrics from MailGun")
-			}
-
-			return next(c)
-		}
-	})
-
-	g.GET("/", echo.WrapHandler(promhttp.Handler()))
-
-	log.Fatal(e.Start(":9999"))
-
-}
 
 type MailgunExporter struct {
 	privateAPIKey string
@@ -132,7 +95,7 @@ func (m *MailgunExporter) CollectMetrics() error {
 }
 
 func (m *MailgunExporter) createMailgunAPIClient(domain string) *mailgun.MailgunImpl {
-	mg := mailgun.NewMailgun(domain, privateAPIKey)
+	mg := mailgun.NewMailgun(domain, m.privateAPIKey)
 
 	if strings.ToUpper(m.region) == "EU" {
 		mg.SetAPIBase(mailgun.APIBaseEU)

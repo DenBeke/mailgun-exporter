@@ -2,7 +2,6 @@ package mailgunexporter
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -19,10 +18,10 @@ type MailgunExporter struct {
 	privateAPIKey string
 	region        string
 
-	acceptedGauge          prometheus.Gauge
-	deliveredGauge         prometheus.Gauge
-	failedTemporaryGauge   prometheus.Gauge
-	failedPermanentlyGauge prometheus.Gauge
+	acceptedGauge          *prometheus.GaugeVec
+	deliveredGauge         *prometheus.GaugeVec
+	failedTemporaryGauge   *prometheus.GaugeVec
+	failedPermanentlyGauge *prometheus.GaugeVec
 }
 
 // New creates a new MailgunExoprter with the given private API key and region.
@@ -33,23 +32,25 @@ func New(privateAPIKey string, region string) (*MailgunExporter, error) {
 		region:        region,
 	}
 
+	labels := []string{"domain"}
+
 	// TODO: add domain as label
-	m.acceptedGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	m.acceptedGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mailgun_accepted_total",
 		Help: "",
-	})
-	m.deliveredGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	}, labels)
+	m.deliveredGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mailgun_delivered_total",
 		Help: "",
-	})
-	m.failedTemporaryGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	}, labels)
+	m.failedTemporaryGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mailgun_failed_temporary_total",
 		Help: "",
-	})
-	m.failedPermanentlyGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	}, labels)
+	m.failedPermanentlyGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mailgun_failed_permanently_total",
 		Help: "",
-	})
+	}, labels)
 
 	return m, nil
 }
@@ -57,29 +58,27 @@ func New(privateAPIKey string, region string) (*MailgunExporter, error) {
 // CollectMetrics will get all the stats for all the domains and put them in the correct prometheus collectors.
 func (m *MailgunExporter) CollectMetrics() error {
 
-	_, err := m.ListDomains()
+	domains, err := m.ListDomains()
 	if err != nil {
 		log.Errorf("couldn't list domains: %v", err)
 		return fmt.Errorf("couldn't list domains: %v", err)
 
 	}
-	//fmt.Printf("%+v", domains)
+	log.Printf("domains: %+v", domains)
 
-	stats, err := m.GetStats("denbeke.be")
-	if err != nil {
-		log.Errorf("couldn't get stats: %v", err)
-		return fmt.Errorf("couldn't get stats: %v", err)
+	for _, domain := range domains {
+
+		stats, err := m.GetStats(domain)
+		if err != nil {
+			log.Errorf("couldn't get stats: %v", err)
+			return fmt.Errorf("couldn't get stats: %v", err)
+		}
+
+		log.Printf("stats for %s: %+v", domain, stats)
+
+		m.SetPrometheusFromStats(stats, domain)
+
 	}
-
-	jsonBytes, err := json.Marshal(stats)
-	if err != nil {
-		log.Errorf("couldn't marshal stats: %v", err)
-		return fmt.Errorf("couldn't marshal stats: %v", err)
-	}
-
-	fmt.Println(string(jsonBytes))
-
-	m.SetPrometheusFromStats(stats)
 
 	return nil
 }
@@ -95,14 +94,18 @@ func (m *MailgunExporter) createMailgunAPIClient(domain string) *mailgun.Mailgun
 	return mg
 }
 
-// SetPrometheusFromStats sets all the values from the stats object as values for the Prometheus gauges.
-func (m *MailgunExporter) SetPrometheusFromStats(stats *Stats) {
-	// TODO: do this for all domains and add domain as label
+// SetPrometheusFromStats sets all the values from the stats object as values for the Prometheus gauges for the given domain.
+func (m *MailgunExporter) SetPrometheusFromStats(stats *Stats, domain string) {
 	// TODO: do this for all mailgun events
-	m.acceptedGauge.Set(float64(stats.Accepted))
-	m.deliveredGauge.Set(float64(stats.Delivered))
-	m.failedTemporaryGauge.Set(float64(stats.FailedTemporary))
-	m.failedPermanentlyGauge.Set(float64(stats.FailedPermanently))
+
+	labels := prometheus.Labels{
+		"domain": domain,
+	}
+
+	m.acceptedGauge.With(labels).Set(float64(stats.Accepted))
+	m.deliveredGauge.With(labels).Set(float64(stats.Delivered))
+	m.failedTemporaryGauge.With(labels).Set(float64(stats.FailedTemporary))
+	m.failedPermanentlyGauge.With(labels).Set(float64(stats.FailedPermanently))
 }
 
 // GetStats returns the Mailgun stats for a given domain.

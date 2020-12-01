@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/DenBeke/mailgun-exporter)](https://goreportcard.com/report/github.com/DenBeke/mailgun-exporter)
 [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/denbeke/mailgun-exporter?sort=date)](https://hub.docker.com/r/denbeke/mailgun-exporter)
 
-WIP
+Prometheus exporter to fetch metrics from Mailgun API.
 
 
 ## Run with Docker

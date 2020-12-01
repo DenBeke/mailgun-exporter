@@ -1,5 +1,6 @@
 # Prometheus Exporter for Mailgun ✉️
 
+[![Build Status](https://travis-ci.com/DenBeke/mailgun-exporter.svg?branch=master)](https://travis-ci.com/DenBeke/mailgun-exporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DenBeke/mailgun-exporter)](https://goreportcard.com/report/github.com/DenBeke/mailgun-exporter)
 [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/denbeke/mailgun-exporter?sort=date)](https://hub.docker.com/r/denbeke/mailgun-exporter)
 

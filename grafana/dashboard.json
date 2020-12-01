@@ -47,7 +47,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
           }
@@ -106,7 +106,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
           }
@@ -283,7 +283,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
           }
@@ -342,7 +342,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
           }

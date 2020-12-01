@@ -18,7 +18,6 @@ archives:
     386: i386
     amd64: x86_64
   files:
-    - config_sample.yml
     - README.md
     - LICENSE
 checksum:
